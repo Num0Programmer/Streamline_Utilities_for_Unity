@@ -5,6 +5,10 @@ using UnityEngine;
  *      The m_CameraController class is intended to be inhereted from. This class provides a few methods, which are
  *      overwritable, used to help streamline the process of setting up player cameras in Unity.
  * </summary>
+ *
+ * <author>
+ *      Num0Programmer
+ * </author>
  */
 [RequireComponent(typeof(Camera))]
 public class m_CameraController : MonoBehaviour
