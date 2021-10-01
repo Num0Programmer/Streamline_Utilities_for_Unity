@@ -5,6 +5,10 @@ using UnityEngine;
  *      The m_CharacterController class is intended to be inhereted from. This class provides a few methods, which are
  *      overwritable, used to help streamline the process of setting up player movement in Unity.
  * </summary>
+ *
+ * <author>
+ *      Num0Programmer
+ * </author>
  */
 [RequireComponent(typeof(Rigidbody))]
 public class m_CharacterController : MonoBehaviour
