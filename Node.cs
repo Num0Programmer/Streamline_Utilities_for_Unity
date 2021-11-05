@@ -1,5 +1,8 @@
 using UnityEngine;
 
+/// <summary>
+///     Author: Oqquay
+/// </summary>
 public class Node : MonoBehaviour
 {
     //refs to adjacent nodes
