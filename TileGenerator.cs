@@ -1,7 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+///     Author: Oqquay
+/// </summary>
 public class TileGenerator : MonoBehaviour
 {
 
