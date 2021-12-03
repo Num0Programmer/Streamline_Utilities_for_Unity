@@ -13,4 +13,5 @@ A framework which provides basic, physics-based player movement, and a camera co
 
 ### Components
 1. m_CharacterController - Provides a basis for physcis-based movement, and automatically limits the player to never travel faster than the define maximum speed
+
 2. m_CameraController - Provides a basis for a camera controller
