@@ -1,123 +1,88 @@
 using UnityEngine;
 
-/**
- * <summary>
- *      The m_CharacterController class is intended to be inhereted from. This class provides a few methods, which are
- *      overwritable, used to help streamline the process of setting up player movement in Unity.
- * </summary>
- *
- * <author>
- *      Num0Programmer
- * </author>
- */
-[RequireComponent(typeof(Rigidbody))]
+/// <summary>
+///     The m_CharacterController provides a basic framework for player
+///     movement; this is meant to be changed at the whim of the user to achieve
+///     an ideal player movement experience
+///
+///     Note: This class is intended to be inhereted from
+///
+///     Author: Num0Programmer
+/// </summary>
+[ RequireComponent( typeof( Rigidbody ) ) ]
 public class m_CharacterController : MonoBehaviour
 {
-    /**
-     * <summary>
-     *      Instance variable <c>moveForce</c> the force applied to the player object when directional input is provided.
-     * </summary>
-     */
+    /// <summary>
+    ///      Used to define how fast the player could possible travel in a given
+    ///      direction; used to determine the maximum velocity
+    /// </summary>
     [SerializeField]
-    protected float moveForce;
+    protected float maximumSpeed = 20f;
 
-    /**
-     * <summary>
-     *      Instance variable <c>jumpForce</c> the force applied to the player object when jump input is provided.
-     * </summary>
-     */
+    /// <summary>
+    ///     Used to define how fast the player reaches maximum velocity
+    /// </summary>
+    [SerializeField]
+    protected float acceleration = 50f;
+
+    /// <summary>
+    ///     Used to apply force to the player when they are jumping
+    /// </summary>
     [SerializeField]
     protected float jumpForce;
 
-    /**
-    * <summary>
-    *      Instance variable <c>showGroundChecking</c> used for <c>groundCheck</c> position and radius debugging.
-    *      
-    *      <example>
-    *           If <c>showGroundChecking</c> is equal to true, then a wire sphere will be displayed in the Scene, with a
-    *           specified radius.
-    *           
-    *           Otherwise, the wire sphere will NOT be displayed.
-    *      </example>
-    * </summary>
-    */
+    /// <summary>
+    ///     A flag which identifies if the player is standing on an object that
+    ///     is on the ground layer
+    ///
+    ///     Note: The name given to the "ground layer" is user defined
+    ///
+    ///     Note: This flag is intended to be updated with a call to the
+    ///     Grounded() method every fixed update; this is simply done in the
+    ///     interest of performance
+    /// </summary>
+    protected bool grounded;
+
+    /// <summary>
+    ///     Used for groundCheck position and radius debugging
+    /// </summary>
     [SerializeField]
     private bool showGroundChecking;
 
-    /**
-    * <summary>
-    *      Instance variable <c>rotationSmoother</c> controls how smooth the transition is from rotation n to
-    *      rotation n + desire_rotation.
-    * </summary>
-    */
-    [SerializeField]
-    private float rotationSmoother = 1f;
-
-    /**
-    * <summary>
-    *      Instance variable <c>rotationSmoothVelocity</c> represents the current rotation of the player object after
-    *      smoothing is applied.
-    * </summary>
-    */
-    private float rotationSmoothVelocity;
-
-    /**
-    * <summary>
-    *      Instance variable <c>velocitySmoother</c> controls how smooth the transition is from velocity n to
-    *      veloctiy n + wished_veloctiy.
-    * </summary>
-    */
-    [SerializeField]
-    private float velocitySmoother = 0.1f;
-
-    /**
-    * <summary>
-    *      Instance variable <c>smoothVelocity</c> represents the current velocity of player object after smoothing is
-    *      applied.
-    * </summary>
-    */
-    private Vector3 smoothVelocity;
-
-    /**
-    * <summary>
-    *      Instance variable <c>checkForGroundDist</c> the maximum vertical distance the player object can be from the
-    *      ground and still be considered "grounded".
-    * </summary>
-    */
+    /// <summary>
+    ///     Used to define the maximum vertical distance the player object can
+    ///     be above the ground and still be considered on the ground
+    /// </summary>
     [Range(0f, 1f)]
     [SerializeField]
     protected float checkForGroundDist;
 
-    /**
-    * <summary>
-    *      Instance variable <c>body</c> is a reference to the Rigidbody component which is appears on the player object.
-    * </summary>
-    */
+    /// <summary>
+    ///     Reference to the Rigidbody component which is appears on the player
+    ///     object
+    /// </summary>
     protected Rigidbody body;
 
-    /**
-    * <summary>
-    *      Instance variable <c>groundCheck</c> an arbitrary point in space, maintained by an empty game object which marks
-    *      the center of a sphere with radius = <c>checkForGroundDist</c>.
-    * </summary>
-    */
+    /// <summary>
+    ///     Reference to an arbitrary point in space, maintained by an empty
+    ///     game object which marks the center of a sphere with a radius equal
+    ///     to checkForGroundDist
+    /// </summary>
     [SerializeField]
     protected Transform groundCheck;
 
-    /**
-    * <summary>
-    *      Instance variable <c>groundMask</c> determines what layer is "ground".
-    * </summary>
-    */
+    /// <summary>
+    ///     Determines what layer is "ground"
+    /// </summary>
     [SerializeField]
     protected LayerMask groundMask;
 
-    /**
-    * <summary>
-    *      Instance variable <c>cam</c> which represents the position and rotation attributes of the camera accompanying
-    *      the player object.
-    * </summary>
-    */
+    /// <summary>
+    ///     Reference to an arbitrary point in space, maintainded by a Camera
+    ///     object, which represents the position and rotation attributes of the
+    ///     camera accompanying the player object
+    /// </summary>
+    [SerializeField]
     protected Transform cam;
 
     private void Awake()
@@ -125,141 +90,100 @@ public class m_CharacterController : MonoBehaviour
         body = GetComponent<Rigidbody>();
     }
 
-    /**
-     * <summary>
-     *      This method mutates the player object's velocity based on a desired direction.
-     *      
-     *      <param name="inWishedDir">
-     *          <remarks>
-     *              Vector3
-     *          </remarks>
-     *          
-     *          A normalized vector representing the desired the player wishes to direct the player object.
-     *      </param>
-     *      
-     *      <param name="jump">
-     *          <remarks>
-     *              Boolean
-     *          </remarks>
-     *          
-     *          Identifies whether to add up force to the player object.
-     *      </param>
-     *      
-     *      <param name="crouch">
-     *          <remarks>
-     *              Boolean
-     *          </remarks>
-     *          
-     *          Identifies whether the player is crouching.
-     *          
-     *          <remarks>
-     *              The player's velocity will be restricted to a depleated max velocity while <c>crouch</c> is
-     *              enabled.
-     *          </remarks>
-     *      </param>
-     * </summary>
-     */
-    public virtual void MoveInFirst(Vector3 inWishedDir, bool jump, bool crouch)
+    /// <summary>
+    ///     This method applies an acceleration force to the player object
+    ///     toward the defined maximum velocity
+    /// </summary>
+    /// 
+    /// <param name="inDesiredDirection">
+    ///     A normalized Vector3 which represents the direction the player wants
+    ///     to move in
+    /// </param>
+    /// 
+    /// <param name="jump">
+    ///     A boolean representing if the player pressed the designated jump
+    ///     button
+    /// </param>
+    ///
+    /// <param name="crouch">
+    ///     A boolean representing if the player pressed the designated crouch
+    ///     button
+    /// </param>
+    protected virtual void Move( Vector3 inDesiredDirection, bool jump,
+                                 bool crouch )
     {
-        body.velocity = Vector3.SmoothDamp(body.velocity, inWishedDir * moveForce, ref smoothVelocity, velocitySmoother);
+        // define a Vector3 to hold the calculated velocity left to gain before
+        // reaching maximum velocity
+        Vector3 velocityToGain;
 
-        if (jump && Grounded())
-        {
-            body.AddForce(transform.up * jumpForce, ForceMode.Impulse);
-        }
-        else if (!Grounded())
-        {
-            body.AddForce(transform.up * -1f, ForceMode.Impulse);
-        }
+        // define a Vector3 to hold the found acceleration
+        Vector3 neededAcceleration;
+
+        // find velocity left to gain before reaching maximum velocity
+        velocityToGain = ( inDesiredDirection * maximumSpeed ) - body.velocity;
+
+        // find the acceleration, for this time update, to reach maximum
+        // velocity
+        neededAcceleration = velocityToGain / Time.fixedDeltaTime;
+
+        neededAcceleration =
+            Vector3.MoveTowards( body.velocity,
+                                 neededAcceleration,
+                                 acceleration / Time.fixedDeltaTime );
+
+        // apply a force with needed acceleration in relation to this object's
+        // mass
+        body.AddForce( new Vector3( neededAcceleration.x,
+                                    body.velocity.y,
+                                    neededAcceleration.z ) * body.mass );
+
+        // Check if player is jumping and is grounded
+        if ( jump && grounded ) Jump();
     }
 
-    /**
-     * <summary>
-     *      This method mutates the player object's velocity based on a desired direction.
-     *      
-     *      <remarks>
-     *          The player object will be rotated in relation to the direction the camera is facing.
-     *          
-     *          <example>
-     *              If the player object's forward vector is pointed to the left of the camera's view, and the player
-     *              specifies a direction of forward (i.e. (0, 0, 1)), then the player object will be rotated to head in the
-     *              direction the camera is pointing.
-     *          </example>
-     *      </remarks>
-     *      
-     *      <param name="inWishedDir">
-     *          <remarks>
-     *              Vector3
-     *          </remarks>
-     *          
-     *          A normalized vector representing the desired the player wishes to direct the player object.
-     *      </param>
-     *      
-     *      <param name="jump">
-     *          <remarks>
-     *              Boolean
-     *          </remarks>
-     *          
-     *          Identifies whether to add up force to the player object.
-     *      </param>
-     *      
-     *      <param name="crouch">
-     *          <remarks>
-     *              Boolean
-     *          </remarks>
-     *          
-     *          Identifies whether the player is crouching.
-     *          
-     *          <remarks>
-     *              The player's velocity will be restricted to a depleated max velocity while <c>crouch</c> is
-     *              enabled.
-     *          </remarks>
-     *      </param>
-     * </summary>
-     */
-    public virtual void MoveInThird(Vector3 inWishedDir, bool jump, bool crouch)
+    /// <summary>
+    ///     Simply adds an upward acceleration force to the player object
+    /// </summary>
+    protected virtual void Jump()
     {
-        if (inWishedDir != Vector3.zero)
-        {
-            float targetAngle = Mathf.Atan2(inWishedDir.x, inWishedDir.z) * Mathf.Rad2Deg +
-                                            cam.localEulerAngles.y;
-            transform.eulerAngles = Vector3.up * Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle,
-                                                                       ref rotationSmoothVelocity, rotationSmoother);
-        }
-
-        body.velocity = Vector3.SmoothDamp(body.velocity, transform.forward * inWishedDir.magnitude * moveForce,
-                                           ref smoothVelocity, velocitySmoother);
-
-        if (jump && Grounded())
-        {
-            body.AddForce(transform.up * jumpForce, ForceMode.Impulse);
-        }
-        else if (!Grounded())
-        {
-            body.AddForce(transform.up * -1f, ForceMode.Impulse);
-        }
+        body.AddForce( transform.up * jumpForce * body.mass );
     }
 
-    /**
-     * <summary>
-     *      This method checks for objects on <c>groundMask</c> within a specified radius.
-     *      
-     *      <returns>
-     *          Boolean result of test for object within a sphere of radiuss <c>checkForGroundDist</c>.
-     *      </returns>
-     * </summary>
-     */
-    public bool Grounded()
+    /// <summary>
+    ///     Checks for objects on groundMask within a specified radius
+    /// </summary>
+    /// 
+    /// <returns>
+    ///     Boolean identifying if the player is standing on top of an object
+    ///     that is on the "ground mask"
+    /// </returns>
+    protected bool Grounded()
     {
-        return Physics.CheckSphere(groundCheck.position, checkForGroundDist, groundMask);
+        return Physics.CheckSphere( groundCheck.position, checkForGroundDist,
+                                    groundMask );
     }
 
+    /// <summary>
+    ///     OnDrawGizmos is called regardless; this method renders a wire
+    ///     sphere, with a maximum radius of 1, to the game scene
+    ///
+    ///     Note: User must set showGroundChecking to true in the inspector
+    ///           before the wire sphere will appear
+    /// </summary>
     private void OnDrawGizmos()
     {
-        if (showGroundChecking)
+        try
         {
-            Gizmos.color = Color.blue;
-            Gizmos.DrawWireSphere(groundCheck.position, checkForGroundDist);
+            if ( showGroundChecking )
+            {
+                Gizmos.color = Color.blue;
+                Gizmos.DrawWireSphere( groundCheck.position,
+                                       checkForGroundDist );
+            }
+        }
+        catch( UnassignedReferenceException )
+        {
+            Debug.LogWarning( "Missing reference to a ground check position" );
         }
     }
 }
