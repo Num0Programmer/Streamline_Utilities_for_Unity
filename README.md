@@ -1,4 +1,6 @@
-# Purpose
+# Streamline Utilites for Unity3D
+
+## Purpose
 This is a collection of scripts I am putting together through my journey as a game dev to streamline remedial tasks such as setting up player controllers.
 
 ## Player Controller ToolKit
