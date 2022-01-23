@@ -12,6 +12,8 @@ using UnityEngine;
 [ RequireComponent( typeof( Rigidbody ) ) ]
 public class m_CharacterController : MonoBehaviour
 {
+    [ Header( "MOVEMENT" ) ]
+
     /// <summary>
     ///      Used to define how fast the player could possible travel in a given
     ///      direction; used to determine the maximum velocity
@@ -26,10 +28,23 @@ public class m_CharacterController : MonoBehaviour
     protected float acceleration = 50f;
 
     /// <summary>
+    ///     Used to define how much to limit player's influence on movement when
+    ///     in the air
+    ///
+    ///     Note: By default 10% of the total calculated acceleration is given
+    /// </summary>
+    [SerializeField]
+    protected float accelLimiter = 0.10000f;
+
+    [ Header( "JUMPING" ) ]
+
+    /// <summary>
     ///     Used to apply force to the player when they are jumping
     /// </summary>
     [SerializeField]
     protected float jumpForce;
+
+    [ Header( "GROUND DETECTION" ) ]
 
     /// <summary>
     ///     A flag which identifies if the player is standing on an object that
@@ -58,12 +73,6 @@ public class m_CharacterController : MonoBehaviour
     protected float checkForGroundDist;
 
     /// <summary>
-    ///     Reference to the Rigidbody component which is appears on the player
-    ///     object
-    /// </summary>
-    protected Rigidbody body;
-
-    /// <summary>
     ///     Reference to an arbitrary point in space, maintained by an empty
     ///     game object which marks the center of a sphere with a radius equal
     ///     to checkForGroundDist
@@ -77,6 +86,8 @@ public class m_CharacterController : MonoBehaviour
     [SerializeField]
     protected LayerMask groundMask;
 
+    [ Header( "CHILD ASSIGNMENT" ) ]
+
     /// <summary>
     ///     Reference to an arbitrary point in space, maintainded by a Camera
     ///     object, which represents the position and rotation attributes of the
@@ -84,6 +95,12 @@ public class m_CharacterController : MonoBehaviour
     /// </summary>
     [SerializeField]
     protected Transform cam;
+
+    /// <summary>
+    ///     Reference to the Rigidbody component which is appears on the player
+    ///     object
+    /// </summary>
+    protected Rigidbody body;
 
     private void Awake()
     {
@@ -112,8 +129,8 @@ public class m_CharacterController : MonoBehaviour
     protected virtual void Move( Vector3 inDesiredDirection, bool jump,
                                  bool crouch )
     {
-        // define a Vector3 to hold the calculated velocity left to gain before
-        // reaching maximum velocity
+        // define a Vector3 to hold the calculated velocity left to gain
+        // before reaching maximum velocity
         Vector3 velocityToGain;
 
         // define a Vector3 to hold the found acceleration
@@ -126,19 +143,34 @@ public class m_CharacterController : MonoBehaviour
         // velocity
         neededAcceleration = velocityToGain / Time.fixedDeltaTime;
 
+        // move the player's current velocity closer to the found
+        // acceleration vector
         neededAcceleration =
             Vector3.MoveTowards( body.velocity,
                                  neededAcceleration,
                                  acceleration / Time.fixedDeltaTime );
 
-        // apply a force with needed acceleration in relation to this object's
-        // mass
-        body.AddForce( new Vector3( neededAcceleration.x,
-                                    body.velocity.y,
-                                    neededAcceleration.z ) * body.mass );
+        if ( grounded )
+        {
+            if ( jump )
+            {
+                Jump();
+            }
 
-        // Check if player is jumping and is grounded
-        if ( jump && grounded ) Jump();
+            // apply a force with needed acceleration in relation to this
+            // object's mass
+            body.AddForce( new Vector3( neededAcceleration.x,
+                                        body.velocity.y,
+                                        neededAcceleration.z ) * body.mass );
+        }
+        else if ( inDesiredDirection != Vector3.zero )
+        {
+            // apply a limited amount of force to the player while they are NOT
+            // grounded and are trying to move
+            body.AddForce( new Vector3( neededAcceleration.x * accelLimiter,
+                                        body.velocity.y,
+                                        neededAcceleration.z * accelLimiter ) * body.mass );
+        }
     }
 
     /// <summary>
