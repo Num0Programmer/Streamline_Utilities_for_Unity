@@ -9,10 +9,10 @@ using UnityEngine;
 ///
 ///     Author: Num0Programmer
 /// </summary>
-[ RequireComponent( typeof( Rigidbody ) ) ]
+[RequireComponent( typeof( Rigidbody ) )]
 public class m_CharacterController : MonoBehaviour
 {
-    [ Header( "MOVEMENT" ) ]
+    [Header( "MOVEMENT" )]
 
     /// <summary>
     ///      Used to define how fast the player could possible travel in a given
@@ -36,7 +36,7 @@ public class m_CharacterController : MonoBehaviour
     [SerializeField]
     protected float accelLimiter = 0.10000f;
 
-    [ Header( "JUMPING" ) ]
+    [Header( "JUMPING" )]
 
     /// <summary>
     ///     Used to apply force to the player when they are jumping
@@ -44,7 +44,7 @@ public class m_CharacterController : MonoBehaviour
     [SerializeField]
     protected float jumpForce;
 
-    [ Header( "GROUND DETECTION" ) ]
+    [Header( "GROUND DETECTION" )]
 
     /// <summary>
     ///     A flag which identifies if the player is standing on an object that
@@ -86,7 +86,7 @@ public class m_CharacterController : MonoBehaviour
     [SerializeField]
     protected LayerMask groundMask;
 
-    [ Header( "CHILD ASSIGNMENT" ) ]
+    [Header( "CHILD ASSIGNMENT" )]
 
     /// <summary>
     ///     Reference to an arbitrary point in space, maintainded by a Camera
@@ -147,8 +147,7 @@ public class m_CharacterController : MonoBehaviour
         // acceleration vector
         neededAcceleration =
             Vector3.MoveTowards( body.velocity,
-                                 neededAcceleration,
-                                 acceleration / Time.fixedDeltaTime );
+                                 neededAcceleration, acceleration );
 
         if ( grounded )
         {
