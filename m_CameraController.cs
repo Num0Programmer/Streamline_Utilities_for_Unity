@@ -9,7 +9,7 @@ using UnityEngine;
 ///
 ///     Author: Num0Programmer
 /// </summary>
-[RequireComponent( typeof( Camera ) ) ]
+[RequireComponent( typeof( Camera ) )]
 public class m_CameraController : MonoBehaviour
 {
     /// <summary>
@@ -53,58 +53,11 @@ public class m_CameraController : MonoBehaviour
     protected float sensitivityV = 10f;
 
     /// <summary>
-    ///     Determines how the camera will move about the player
-    ///
-    ///     Note: Off - rotate around player's z- and x-axies - First Person
-    ///           On - rotate around the player object - Third Person
-    /// </summary>
-    [SerializeField]
-    private bool thirdPersonCam;
-
-    /// <summary>
-    ///     Determines the distance the camera will keep from the player object
-    /// </summary>
-    [SerializeField]
-    protected float distFromTarget = 4f;
-
-    /// <summary>
-    ///     Used to control how smooth the transition is from rotation n to
-    ///     rotation n + mouse_input
-    /// </summary>
-    [SerializeField]
-    private float rotationSmoother = 0.1f;
-
-    /// <summary>
-    ///     Represents the current rotation of the camera
-    /// </summary>
-    private Vector3 currentRotation = Vector3.zero;
-
-    /// <summary>
-    ///     Used during rotation calculation to help smooth from one rotation to
-    ///     another
-    /// </summary>
-    private Vector3 rotationSmoothVelocity;
-
-    /// <summary>
     ///     Reference to an arbitrary point in space, maintained by an empty
     ///     game object, which marks the center of the object the camera will
     ///     rotate about
     /// </summary>
     protected Transform target;
-
-    /// <summary>
-    ///     Uses the current pitch and yaw of the camera to rotate around the
-    ///     target object
-    /// </summary>
-    protected virtual void RotateInThird()
-    {
-        currentRotation = Vector3.SmoothDamp( currentRotation, new Vector3( pitch, yaw ), ref rotationSmoothVelocity,
-                                              rotationSmoother );
-
-        transform.eulerAngles = currentRotation;
-
-        transform.position = target.position - transform.forward * distFromTarget;
-    }
 
     /// <summary>
     ///     Uses the current pitch and yaw of the camera to rotate about the
